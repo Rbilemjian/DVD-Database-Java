@@ -1,4 +1,5 @@
-public class Node
+import java.io.*;
+public class Node implements Serializable
 {
   Object item;
   Node next;

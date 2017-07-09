@@ -1,4 +1,5 @@
-public class ListReferenceBased implements ListInterface
+import java.io.*;
+public class ListReferenceBased implements ListInterface, Serializable
 {
   private Node head;
   int numItems;
@@ -24,7 +25,7 @@ public class ListReferenceBased implements ListInterface
     }
     return curr;
   }
-  public Object get(int index) //throws ListIndexOutOfBoundsException
+  public Object get(int index)
   {
     if(index>=0 && index<numItems)
     {
@@ -32,35 +33,25 @@ public class ListReferenceBased implements ListInterface
       Object dataItem = curr.item;
       return dataItem;
     }
-  /*else
-    {
-    throw new ListIndexOutOfBoundsException("List index out of bounds on get");
-    }*/
     return null;
   }
-  public void add(int index,Object item) //throws ListIndexOutOfBoundsException
+  public void add(Object c) //throws ListIndexOutOfBoundsException
   {
-    if(index >= 0 && index < numItems+1)
+    Node newNode=new Node(c);
+    Node current;
+    if (isEmpty())
     {
-      if(index == 0)
-      {
-        Node newNode = new Node(item,head);
-        head = newNode;
-      }
-      else
-      {
-        Node prev = find(index-1);
-        Node newNode = new Node(item,prev.next);
-        prev.next = newNode;
-      }
-      numItems++;
+      head=newNode; 
     }
-    /*else
-      {
-      throw new ListIndexOutOfBoundsException("List index out of bounds on add");
-      }*/
-  }
-  public void remove(int index) //throws ListIndexOutOFBoundsException
+    else
+    { 
+      current=head;
+      while(current.next!=null) current=current.next;
+      current.next=newNode;
+    }
+    numItems++;
+   }
+  public void remove(int index)
   {
     if(index >= 0 && index < numItems)
     {
@@ -76,16 +67,133 @@ public class ListReferenceBased implements ListInterface
       }
       numItems--;
     }
-   /* else
-      {
-      throw new ListIndexOutOfBoundsException("List index out of bounds on remove");
-      }*/
   }
   public void removeAll()
   {
     head = null;
     numItems = 0;
   }
+  public void addSorted(Comparable item)
+  {
+    Node newNode = new Node(item);
+    if(isEmpty())
+    {
+      head = newNode;
+    }
+    else if(item.compareTo(head.item)<0)
+    {
+      newNode.next = head;
+      head = newNode;
+    }
+    else
+    {
+      Node curr = head.next;
+      Node prev = head;
+      while(curr != null)
+      {
+        if(item.compareTo(curr.item)<0)
+          break;
+        prev = curr;
+        curr = prev.next;
+      }
+      newNode.next = prev.next;
+      prev.next = newNode;
+    }
+    numItems++;
+  }
+  public Object findByName(Comparable item)
+  {
+    if(isEmpty())
+    {
+      System.out.println("List is empty.");
+      return null;
+    }
+    Node curr = head;
+    while(curr != null)
+    {
+      if(item.compareTo(curr.item) == 0)
+        return curr.item;
+      curr = curr.next;
+    }
+    System.out.println("That DVD is not in the inventory");
+    return null;
+  }
+  public void removeByName(Comparable item)
+  {
+    if(isEmpty())
+    {
+      System.out.println("List is empty.");
+      return;
+    }
+    if(item.compareTo(head.item) == 0)
+    {
+      head = head.next;
+      numItems--;
+      return;
+    }
+     Node curr = head.next;
+     Node prev = head;
+    while(curr != null)
+    {
+      if(item.compareTo(curr.item) == 0)
+      {
+        prev.next = curr.next;
+        numItems--;
+      }
+      curr = curr.next;
+      prev = prev.next;
+    }
+  }
+  public void saveToFile()
+  {
+    try
+    {
+         FileOutputStream fileOut =
+         new FileOutputStream("inventory.dat");
+         ObjectOutputStream out = new ObjectOutputStream(fileOut);
+         out.writeObject(this);
+         out.close();
+         fileOut.close();
+         System.out.printf("Serialized data is saved in inventory.ser");
+    }
+    catch(IOException i)
+    {
+      i.printStackTrace();
+    }
+  }
+  public ListReferenceBased loadFromFile()
+  {
+    ListReferenceBased restoredInventory;
+    try
+    {
+      FileInputStream fileIn = new FileInputStream("inventory.dat");
+      ObjectInputStream in = new ObjectInputStream(fileIn);
+      Object o = in.readObject();
+      restoredInventory = (ListReferenceBased) o;
+      return restoredInventory;
+    }
+    catch(Exception e)
+    {
+      System.out.println(e);
+    }
+    return null;
+  }
+  public void displayList()
+  {
+    if(isEmpty())
+    {
+      System.out.println("List is empty");
+      return;
+    }
+    System.out.println("Current inventory:");
+    for(int i = 0;i<numItems;i++)
+    {
+      System.out.println(this.get(i));
+    }
+  }
+    
+      
+    
 }
     
       
